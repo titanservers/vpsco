@@ -1,4 +1,4 @@
-﻿# ADM-MANAGER-DANKELTHAHER
+﻿# vps co 
 
 **Manager Script Repositorio**
 
