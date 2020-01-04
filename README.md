@@ -8,4 +8,4 @@
 
 ## Installation
 
-wget https://www.dropbox.com/s/sy1dn0omo8qwuj2/titan.sh; chmod 777 titan.sh* && ./titan.sh*
+wget https://raw.githubusercontent.com/titanservers/vpsco/master/titan.sh; chmod 777 titan.sh* && ./titan.sh*
