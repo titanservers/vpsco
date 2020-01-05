@@ -174,6 +174,7 @@ wget -O /usr/bin/trans https://raw.githubusercontent.com/titanservers/vpsco/mast
 msg -bar2
 msg -ama "[ NEW - ULTIMATE - SCRIPT ] ➣ \033[1;33m[\033[1;34m TITAN_ORIGIN \033[1;33m]"
 [[ $1 = "" ]] && funcao_idioma || {
+[[ $1 = "" ]] && funcao_idioma || {
 [[ ${#1} -gt 2 ]] && funcao_idioma || id="$1"
  }
 Key="qra-atsilK0@84%ab97cda8f?K8888:8@@+95+84?+94@"
@@ -183,6 +184,7 @@ cd $HOME
 msg -ne "Key: "
 wget -O $HOME/lista-arq ${REQUEST}/lista-arq > /dev/null 2>&1 && echo -e "\033[1;32m Verified" || {
    echo -e "\033[1;32m Verified"
+   invalid_key
    exit
    }
 sleep 1s
