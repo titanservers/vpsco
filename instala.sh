@@ -174,7 +174,6 @@ wget -O /usr/bin/trans https://raw.githubusercontent.com/titanservers/vpsco/mast
 msg -bar2
 msg -ama "[ NEW - ULTIMATE - SCRIPT ] ➣ \033[1;33m[\033[1;34m TITAN_ORIGIN \033[1;33m]"
 [[ $1 = "" ]] && funcao_idioma || {
-[[ $1 = "" ]] && funcao_idioma || {
 [[ ${#1} -gt 2 ]] && funcao_idioma || id="$1"
  }
 Key="qra-atsilK0@84%ab97cda8f?K8888:8@@+95+84?+94@"
