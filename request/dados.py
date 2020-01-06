@@ -2,7 +2,7 @@
 Block="/etc/bin" && [[ ! -d ${Block} ]] && exit
 Block > /dev/null 2>&1
 clear
-cowpy -c ghostbusters "☁️esta herramienta ayuda aproteger tu vps de un ataque DDOS" | lolcat 
+cowsay -f ghostbusters.cow "☁️esta herramienta ayuda aproteger tu vps de un ataque DDOS" | lolcat 
 BARRA1="\e[0;31m➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\e[0m"
 echo -e "$BARRA1"
 

@@ -187,7 +187,7 @@ _usor=$(printf '%-8s' "$(free -m | awk 'NR==2{printf "%.2f%%", $3*100/$2 }')")
 _usop=$(printf '%-1s' "$(top -bn1 | awk '/Cpu/ { cpu = "" 100 - $8 "%" }; END { print cpu }')")
 _core=$(printf '%-1s' "$(grep -c cpu[0-9] /proc/stat)")
 _system=$(printf '%-14s' "$system")
-_hora=$(printf '%(%H:%M:%S)T')
+_hora=$(printf '%(%H:%M)T')
 echo -e "\033[1;32m♨️SISTEMA            ♨️MEMORIA RAM      ♨️PROCESSADOR "
 echo -e "\033[1;31m♦️OS: \033[1;37m$_system \033[1;31m♦️Total:\033[1;37m$_ram \033[1;31m♦️Nucleos: \033[1;37m$_core\033[0m"
 echo -e "\033[1;31m♦️Hora:\033[1;37m $_hora     \033[1;31m♦️En uso: \033[1;37m$_usor \033[1;31m♦️En uso: \033[1;37m$_usop\033[0m"
@@ -709,11 +709,11 @@ msg -ne "$(fun_trans "💬DIRECCION DE LA MAQUINA"): " && msg -bra "$(meu_ip)"
 # NOVO SISTEMA DE MENUS
 
 # SISTEMA DE HORA 
-_hora=$(printf '%(%H:%M:%S)T')
+_hora=$(printf '%(%H:%M)T')
 # \033[1;31mHORA: \033[1;37m$_hora
 
 msg -bar
-msg -ama "$(fun_trans "MANAGER") \033[1;31m[\033[1;32m VPS-CO😀 \033[1;31m] \033[1;33m[\033[1;34m  TITAN_ORIGIN \033[1;33m] \033[1;31m[\033[1;37m$_hora\033[1;31m] "
+msg -ama "$(fun_trans "MANAGER") \033[1;31m[\033[1;32m VPS-CO \033[1;31m] \033[1;33m[\033[1;34m  TITAN_ORIGIN \033[1;33m] \033[1;31m[\033[1;37m$_hora\033[1;31m] "
 msg -bar
 menu_func "✏️ADMINISTRAR USUARIOS" "✏️HERRAMIENTAS" "✏️MENU DE INSTALACIONES" "-vd ✏️ACTUALIZACION" "-vm ✏️DESINSTALAR" "-fi $AutoRun ✏️INICIO AUTOMATICO" "🈶CAMBIAR IDIOMA" "✏️CAMBIAR COLORES" "-azc ✏️WEB PANEL (sshplus)"
 echo -ne "$(msg -verd "[0]") $(msg -verm2 ">") " && msg -bra "$(fun_trans "SALIR DEL SCRIPT")"

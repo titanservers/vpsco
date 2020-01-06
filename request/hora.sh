@@ -22,9 +22,10 @@ echo -e " \033[1;33m[\033[1;31m####################\033[1;33m] - \033[1;32m100%\
 sleep 1s
 }
 act_hora () {
-echo "America/Chihuahua" > /etc/timezone
-ln -fs /usr/share/zoneinfo/America/Chihuahua /etc/localtime > /dev/null 2>&1
-dpkg-reconfigure --frontend noninteractive tzdata > /dev/null 2>&1 && echo -e "\033[1;32m [OK]" || echo -e "\033[1;31m [FAIL]"
+timedatectl > /dev/null 2>&1
+timedatectl list-timezones > /dev/null 2>&1
+timedatectl list-timezones  | grep Santiago > /dev/null 2>&1
+timedatectl set-timezone America/Santiago > /dev/null 2>&1
 echo -e "$barra"
 menu
 }
@@ -43,10 +44,9 @@ echo -e "$barra"
 menu
 }
 act_hora3 () {
-timedatectl > /dev/null 2>&1
-timedatectl list-timezones > /dev/null 2>&1
-timedatectl list-timezones  | grep Santiago > /dev/null 2>&1
-timedatectl set-timezone America/Santiago > /dev/null 2>&1
+echo "America/Chihuahua" > /etc/timezone
+ln -fs /usr/share/zoneinfo/America/Chihuahua /etc/localtime > /dev/null 2>&1
+dpkg-reconfigure --frontend noninteractive tzdata > /dev/null 2>&1 && echo -e "\033[1;32m [OK]" || echo -e "\033[1;31m [FAIL]"
 echo -e "$barra"
 menu
 }
