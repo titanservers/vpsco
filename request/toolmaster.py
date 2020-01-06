@@ -18,7 +18,7 @@ def slowprint(s):
         time.sleep(4. / 100)
 banner = '''
 ========= ToolMaster =======\033[91m
-========== NEW -ADM ========\033[96m
+========== VPS -CO ========\033[96m
 '''
 print banner
 def menu():
