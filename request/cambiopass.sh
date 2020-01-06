@@ -2,7 +2,7 @@
 Block="/etc/bin" && [[ ! -d ${Block} ]] && exit
 Block > /dev/null 2>&1
 clear
-cowpy -c ghostbusters "esta herramienta cambia la contrase�a de tu vps...." | lolcat 
+cowpy -c ghostbusters.cow "esta herramienta cambia la contrase�a de tu vps...." | lolcat 
 figlet ..titan.. | lolcat
 echo -e "\033[47;31mATENCION: \033[1;34m ESTA CONTRASENA SERA USADA PARA ENTRAR A SU SERVIDOR
 \033[1;31m\033[0m"

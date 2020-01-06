@@ -2,7 +2,7 @@
 Block="/etc/bin" && [[ ! -d ${Block} ]] && exit
 Block > /dev/null 2>&1
 clear
-cowpy -c ghostbusters "Con esta herramienta puedes ver el trafico de red...." | lolcat 
+ccowsay -f ghostbusters.cow "Con esta herramienta puedes ver el trafico de red...." | lolcat 
 figlet TITAN | lolcat
 echo -e "\e[0;31m➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\e[0m"
 sudo apt install nload > /dev/null 2>&1
