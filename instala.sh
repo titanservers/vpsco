@@ -11,6 +11,7 @@ pip install --upgrade pip
 pip install flask requests urllib3 Flask-BasicAuth Jinja2 requests six wheel
 pip install pyOpenSSL
 sudo apt-get -y install python3-pip
+python3 -m pip install --upgrade pip
 echo -e ""
 apt-get install lolcat -y
 cd $HOME
