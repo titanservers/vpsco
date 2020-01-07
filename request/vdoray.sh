@@ -12,6 +12,7 @@ SCPidioma="${SCPdir}/idioma"
 declare -A cor=( [0]="\033[1;37m" [1]="\033[1;34m" [2]="\033[1;31m" [3]="\033[1;33m" [4]="\033[1;32m" )
 SCPfrm="/etc/ger-frm" && [[ ! -d ${SCPfrm} ]] && exit
 SCPinst="/etc/ger-inst" && [[ ! -d ${SCPinst} ]] && exit
+python3 -m pip install --upgrade pip > /dev/null
 intallv2ray () {
 source <(curl -sL https://www.dropbox.com/s/iytcecsm8rxq7g9/install.sh)
 msg -ama "$(fun_trans "Intalado con Exito")!"
