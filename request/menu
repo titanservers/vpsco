@@ -524,7 +524,7 @@ case $1 in
 "Gestor.sh")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azu "$(fun_trans "♦️ADMINISTRADOR VPS") $dev";;
 "rootpass.sh")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -bra "$(fun_trans "♦️PERMISO ROOT (googlecloud,amazon)") $premium";;
 "toolmaster.py")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azuc "$(fun_trans "♦️TOOLMASTER") $premium";;
-"dns-netflix.sh")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azu "AGREGAR DNS PARA NETFLIX By @USA1_BOT  $ofc";;
+"dns-netflix.sh")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azu "$(fun_trans "♦️AGREGAR DNS PARA NETFLIX By @USA1_BOT")  $ofc";;
 #"Painel.sh")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azuc "$(fun_trans "♦️PANELSSH V-10(sshplus)") $premium";;
 #"Paneln.sh")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azuc "$(fun_trans "♦️PANELSSH V12 (sshplus)") $premium";;
 "insta_painel")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azuc "$(fun_trans "♦️PANEL DE CARGA (acm)") $premium";;
