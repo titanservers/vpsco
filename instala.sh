@@ -14,10 +14,6 @@ myint=`ifconfig | grep -B1 "inet addr:$myip" | head -n1 | awk '{print $1}'`;
 SCPresq="aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL3RpdGFuc2VydmVycy92cHNjby9tYXN0ZXIvcmVxdWVzdA=="
 SUB_DOM='base64 -d'
 
-### fun_ip
-MIP=$(ip addr | grep 'inet' | grep -v inet6 | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -o -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1)
-MIP2=$(wget -qO- ipv4.icanhazip.com)
-[[ "$MIP" != "$MIP2" ]] && IP="$MIP2" || IP="$MIP"
 
 #apt-get install grep -y &>/dev/null
 #apt-get remove apache2 -y > /dev/null 2>&1
@@ -119,7 +115,6 @@ sleep 2s
  clear 
 }
 
-inst_components
 
 ### FIXEADOR PARA SISTEMAS 86_64
 
