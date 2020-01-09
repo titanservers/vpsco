@@ -1,5 +1,7 @@
 #!/bin/bash
 clear
+apt-get install figlet
+apt-get install cowsay
 cd $HOME
 SCPdir="/etc/newadm"
 SCPinstal="$HOME/install"
