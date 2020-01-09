@@ -8,6 +8,7 @@ PPub.py
 PDirect.py
 PGet.py
 dropbear.sh
+dns-netflix.sh
 openvpn.sh
 ssl.sh
 ssld.sh
