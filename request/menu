@@ -522,6 +522,7 @@ case $1 in
 "Crear-Demo.sh") return 1;;
 "panelweb.sh") return 1;;
 "Gestor.sh")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azu "$(fun_trans "♦️ADMINISTRADOR VPS") $dev";;
+"dns-netflix.sh")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azu "AGREGAR DNS PARA NETFLIX By @USA1_BOT  $ofc";;
 "rootpass.sh")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -bra "$(fun_trans "♦️PERMISO ROOT (googlecloud,amazon)") $premium";;
 "toolmaster.py")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azuc "$(fun_trans "♦️TOOLMASTER") $premium";;
 #"Painel.sh")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azuc "$(fun_trans "♦️PANELSSH V-10(sshplus)") $premium";;
@@ -530,7 +531,6 @@ case $1 in
 "unddos.py")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azuc "$(fun_trans "♦️ANTI-DDoS DESINSTALADOR") $dev";;
 "dados.py")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azuc "$(fun_trans "♦️ANTI-DDoS") $dev";;
 "cambiopass.sh")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azuc "$(fun_trans "♦️CAMBIAR CONTRASENA DE VPS") $dev";;
-"dns-netflix.sh")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azu "$(fun_trans "♦️AGREGAR DNS PARA NETFLIX ") $ofc";;
 "vnc")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azuc "$(fun_trans "♦️VNC PANEL DE ADMINISTRACION") $premium";;
 "htop.sh")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azuc "$(fun_trans "♦️HTOP procesos del sistema") $dev";;
 "Proxy-Publico.sh")echo -ne "$(msg -verd "[$2]") $(msg -verm2 ">") " && msg -azuc "$(fun_trans "♦️PROXY COLOR PUBLICO") $premium";;
