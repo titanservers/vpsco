@@ -112,7 +112,15 @@ msg -ama " $(fun_trans "AGREGADO CON EXITO")"
 msg -bar
 }
 
-ssl_redir() {Script para configurar certificado SSLwsocks,dropbear etc...")"
+ssl_redir() {
+msg -bra "$(fun_trans "Asigne un nombre para el redirecionador")"
+msg -bra "$(fun_trans "letras sin espacio ejem: shadow,openvpn,etc...")"
+msg -bar
+read -p " nombre: " namer
+msg -bar
+msg -bra "$(fun_trans "A que puerto redirecionara el puerto SSL")"
+msg -bra "$(fun_trans "Es decir un puerto abierto en su servidor")"
+msg -bra "$(fun_trans "ejemplo: openvpn,shadowsocks,dropbear etc...")"
 msg -bar
 read -p " Local-Port: " portd
 msg -bar
@@ -127,15 +135,25 @@ msg -bar
 msg -bar
 msg -ama " $(fun_trans "Instalando SSL")"
 msg -bar
-fun_bar "apt-get install stunnel4 -y"
-echo -e "cert = /etc/stunnel/stunnel.pem\nclient = no\nsocket = a:SO_REUSEADDR=1\nsocket = l:TCP_NODELAY=1\nsocket = r:TCP_NODELAY=1\n\n[stunnel]\nconnect = 127.0.0.1:${DPORT}\naccept = ${SSLPORT}" > /etc/stunnel/stunnel.conf
-openssl genrsa -out key.pem 2048 > /dev/null 2>&1
-(echo MX; echo MX; echo MX; echo speed; echo VpsPremium; echo FelipeCouoh; echo @felcouoh@hotmail.com)|openssl req -new -x509 -key key.pem -out cert.pem -days 1095 > /dev/null 2>&1
-cat key.pem cert.pem >> /etc/stunnel/stunnel.pem
-sed -i 's/ENABLED=0/ENABLED=1/g' /etc/default/stunnel4
+fun_bar "apt-get install stunnel4"
+msg -bar
+msg -azuc "Presione Enter a todas las opciones"
+sleep 2
+msg -bar
+openssl genrsa 1024 > stunnel.key
+openssl req -new -key stunnel.key -x509 -days 1000 -out stunnel.crt
+cat stunnel.crt stunnel.key > stunnel.pem
+mv stunnel.pem /etc/stunnel/
+
+echo "client = no" >> /etc/stunnel/stunnel.conf
+echo "[${namer}]" >> /etc/stunnel/stunnel.conf
+echo "cert = /etc/stunnel/stunnel.pem" >> /etc/stunnel/stunnel.conf
+echo "accept = ${SSLPORTr}" >> /etc/stunnel/stunnel.conf
+echo "connect = 127.0.0.1:${portd}" >> /etc/stunnel/stunnel.conf
+
 service stunnel4 restart > /dev/null 2>&1
 msg -bar
-msg -ama " $(fun_trans "INSTALADO CON EXITO")"
+msg -ama " $(fun_trans "AGREGADO CON EXITO")"
 msg -bar
 }
 
