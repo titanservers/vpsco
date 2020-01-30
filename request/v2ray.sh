@@ -106,7 +106,7 @@ if [ ${OS} == CentOS ];then
 fi
  
 if [ ${Debian_version} == 9 ];then
-    wget -N --no-check-certificate https://github.com/Dankelthaher/V2ray.Fun/blob/master/enable-debian9-rclocal.sh
+    wget -N --no-check-certificatehttps://github.com/titanservers/vpsco/blob/master/Herramientas/V2ray.Fun-master/V2ray.Fun-master/enable-debian9-rclocal.sh
     bash enable-debian9-rclocal.sh
     rm enable-debian9-rclocal.sh
 fi
@@ -120,7 +120,7 @@ curl -L -s https://install.direct/go.sh | bash
  
 #Install V2ray.Fun
 cd /usr/local/
-git clone https://github.com/Dankelthaher/V2ray.Fun
+git clone https://github.com/titanservers/vpsco/tree/master/Herramientas/V2ray.Fun-master
  
 #Generate Default Configurations
 cd /usr/local/V2ray.Fun/ && python init.py
