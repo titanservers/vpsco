@@ -29,7 +29,7 @@ if __name__ == '__main__':
     data_file = open("/usr/local/V2ray.Fun/panel.config","r")
     data = json.loads(data_file.read())
     data_file.close()
-    print("Bienvenido a V2ray panel - OFC BY DANKELTHAHER\n")
+    print("Bienvenido a V2ray panel - TITAN_ORIGIN\n")
     print("nombre de usuario actual del panel：" + str(data['username']))
     print("Contrasena actual del panel：" + str(data['password']))
     print("Puerto del panel actual：" + str(data['port']))
