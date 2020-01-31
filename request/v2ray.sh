@@ -106,8 +106,7 @@ if [ ${OS} == CentOS ];then
 fi
  
 if [ ${Debian_version} == 9 ];then
-    wget -N --no-check-certificatehttps://github.com/titanservers/vpsco/blob/master/Herramientas/V2ray.Fun-master/V2ray.Fun-master/enable-debian9-rclocal.sh
-    bash enable-debian9-rclocal.sh
+    wget -N --no-check-certificate https://github.com/titanservers/vpsco/blob/master/Herramientas/V2ray.Fun-master/enable-debian9-rclocal.sh
     rm enable-debian9-rclocal.sh
 fi
  
@@ -152,7 +151,7 @@ stopasgroup=true
 killasgroup=true
 EOF
  
-echo -e "${blue}ESTOS DATOS SE USARAN PARA ENRAR AL PANEL${plain}"
+echo -e "${blue}ESTOS DATOS SE USARAN PARA ENTRAR AL PANEL${plain}"
 echo -e "$BARRA1"
 read -p "ingrese el nombre de usuario [predeterminado admin]: " un
 echo -e "$BARRA"
