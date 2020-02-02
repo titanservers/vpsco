@@ -207,7 +207,6 @@ block_userfun "$usuario_del" && msg -verm "[$(fun_trans "Bloqueado")]" || msg -v
 msg -bar
 }
 add_user () {
-Fecha=`date +%d-%m-%y-%R`
 #nome senha Dias limite
 [[ $(cat /etc/passwd |grep $1: |grep -vi [a-z]$1 |grep -v [0-9]$1 > /dev/null) ]] && return 1
 valid=$(date '+%C%y-%m-%d' -d " +$3 days") && datexp=$(date "+%F" -d " + $3 days")
@@ -221,7 +220,6 @@ useradd -M -s /bin/false $1 -e ${valid} > /dev/null 2>&1 || return 1
    echo "$1|$2|${datexp}|$4" > ${USRdatabase}
    for value in `echo ${newbase}`; do
    echo $value >> ${USRdatabase}
-   echo $value >> /etc/B-ADMuser/ADMuser-"$Fecha"
    done
    } || echo "$1|$2|${datexp}|$4" > ${USRdatabase}
 }
@@ -985,7 +983,7 @@ exit
 fi
 [[ -z ${VERY2} ]] && desbloqueo="\033[1;31m[DESACTIVADO]" || desbloqueo="\033[1;32m[ACTIVO]"
 
-msg -ama " MENU ADMINISTRACION DE USUARIOS | VPS-MX By @Kalix1"
+msg -ama " MENU ADMINISTRACION DE USUARIOS | VPS-co TITAN_ORIGIN"
 msg -bar
 menu_func "CREAR NUEVO USUARIO" "\033[1;35mCREAR USUARIO TEMPORAL" "\033[1;91mREMOVER USUARIO" "BLOQUEAR O DESBLOQUEAR USUARIO" "\033[1;93mREINICIAR CONTADOR DE BLOQUEADOS y EXPIRADOS" "EDITAR USUARIO" "\033[1;92mRENOVAR USUARIO" "DETALLES DE TODOS USUARIOS" "MONITOR DE USUARIOS CONECTADOS" "ELIMINAR USUARIOS VENCIDOS" "BACKUP USUARIOS" "BANNER SSH" "\033[1;31m⚠️ELIMINAR TODOS LOS USUARIOS⚠️ \n" " -fi ${verificar} \033[1;97m🔒 LIMITADOR-DE-CUENTAS 🔒 -" " -fi ${desbloqueo} \033[1;97m🔓 DESBLOQUEO-AUTOMATICO 🔓 -" "\033[1;92mLOG DE CUENTAS REGISTRADAS" "LIMPIAR LOG DE LIMITADOR"
 [[ -e "${SCPusr}/Limiter2.log" ]] && echo -ne "$(msg -verd "[18]") $(msg -verm2 ">") " && msg -azu "$(fun_trans "\033[1;93mVER LOG DE LIMITADOR")"
