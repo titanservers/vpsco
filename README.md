@@ -1,4 +1,4 @@
-﻿# vps co V
+﻿# vps co
 
 **Manager Script Repositorio**
 
