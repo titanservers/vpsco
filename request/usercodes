@@ -405,6 +405,7 @@ done
      msg -ne "$(fun_trans "Data de Expiracao"): " && echo -e "$(date "+%F" -d " + $diasuser days")"
      msg -ne "$(fun_trans "Limite de Conexao"): " && echo -e "$limiteuser"
 msg -bar
+mine_port
 add_user "${nomeuser}" "${senhauser}" "${diasuser}" "${limiteuser}" && msg -ama "$(fun_trans "Usuario Criado Com Sucesso")" || msg -verm "$(fun_trans "Erro, Usuario nao criado")"
 [[ $(dpkg --get-selections|grep -w "openvpn"|head -1) ]] && [[ -e /etc/openvpn/openvpn-status.log ]] && newclient "$nomeuser" "$senhauser"
 msg -bar
