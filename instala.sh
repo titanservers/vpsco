@@ -184,6 +184,10 @@ install_fim () {
 msg -ama "$(source trans -b es:${id} "Instalacion Completa, Utilize los Comandos"|sed -e 's/[^a-z -]//ig')" && msg bar2
 echo -e " menu / adm" && msg -verm "$(source trans -b es:${id} "En seguida se reiniciara su VPS "|sed -e 's/[^a-z -]//ig')"
 echo -e "   \033[1;41m   $(source trans -b es:${id} "INICIE SESION CUANDO SE CIERRE ESTA TERMINAL")   \033[0;37m"
+mkdir /etc/crondbl  > /dev/null 2>&1 
+mkdir /etc/rom  > /dev/null 2>&1
+mkdir /etc/bin  > /dev/null 2>&1
+mkdir /etc/nanobc  > /dev/null 2>&1
 [[ $(find /etc/newadm/ger-user -name nombre.log|grep -w "nombre.log"|head -1) ]] || wget -O /etc/newadm/ger-user/nombre.log https://raw.githubusercontent.com/titanservers/vpsco/master/Install/nombre.log &>/dev/null
 msg -bar2
 rm -rf /etc/rc.local
