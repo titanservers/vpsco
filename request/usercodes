@@ -1,12 +1,6 @@
 #!/bin/bash
-#19/12/2019
 clear
-msg -bar
-myip=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0' | head -n1`;
-myint=`ifconfig | grep -B1 "inet addr:$myip" | head -n1 | awk '{print $1}'`;
-NOM=`less /etc/newadm/ger-user/nombre.log` > /dev/null 2>&1
-NOM1=`echo $NOM` > /dev/null 2>&1
-declare -A TIMEUS 
+declare -A TIMEUS
 SCPdir="/etc/newadm"
 SCPdir2="/etc/ger-frm"
 SCPusr="${SCPdir}/ger-user"
@@ -14,7 +8,6 @@ MyPID="${SCPusr}/pid-adm"
 MyTIME="${SCPusr}/time-adm"
 USRdatabase="/etc/ADMuser"
 VERY="$(ps aux|grep "${SCPusr}/usercodes verificar"| grep -v grep)"
-VERY2="$(ps aux|grep "${SCPusr}/usercodes desbloqueo"| grep -v grep)"
 [[ -e ${MyPID} ]] && source ${MyPID} || touch ${MyPID}
 [[ -e ${MyTIME} ]] && source ${MyTIME} || touch ${MyTIME}
 [[ ! -e ${USRdatabase} ]] && touch ${USRdatabase}
