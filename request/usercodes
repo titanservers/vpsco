@@ -1,5 +1,4 @@
 #!/bin/bash
-clear
 declare -A TIMEUS
 SCPdir="/etc/newadm"
 SCPdir2="/etc/ger-frm"
@@ -18,110 +17,37 @@ newclient () {
 #Nome #Senha
 usermod -p $(openssl passwd -1 $2) $1
   while [[ ${newfile} != @(s|S|y|Y|n|N) ]]; do
-msg -bar
-   read -p "Crear Archivo OpenVPN? [S/N]: " -e -i S newfile
+   read -p "$(fun_trans "Crear Archivo Openvpn")? [S/N]: " -e -i S newfile
    tput cuu1 && tput dl1
   done
 if [[ ${newfile} = @(s|S) ]]; then
-	# Generates the custom client.ovpn
-	rm -rf /etc/openvpn/easy-rsa/pki/reqs/$1.req
-	rm -rf /etc/openvpn/easy-rsa/pki/issued/$1.crt
-	rm -rf /etc/openvpn/easy-rsa/pki/private/$1.key
-	cd /etc/openvpn/easy-rsa/
-	./easyrsa build-client-full $1 nopass > /dev/null 2>&1
-	cd
-	
-	cp /etc/openvpn/client-common.txt ~/$1.ovpn
-	echo "<ca>" >> ~/$1.ovpn
-	cat /etc/openvpn/easy-rsa/pki/ca.crt >> ~/$1.ovpn
-	echo "</ca>" >> ~/$1.ovpn
-	echo "<cert>" >> ~/$1.ovpn
-	cat /etc/openvpn/easy-rsa/pki/issued/$1.crt >> ~/$1.ovpn
-	echo "</cert>" >> ~/$1.ovpn
-	echo "<key>" >> ~/$1.ovpn
-	cat /etc/openvpn/easy-rsa/pki/private/$1.key >> ~/$1.ovpn
-	echo "</key>" >> ~/$1.ovpn
-	echo "<tls-auth>" >> ~/$1.ovpn
-	cat /etc/openvpn/ta.key >> ~/$1.ovpn
-	echo "</tls-auth>" >> ~/$1.ovpn
-	
+cp /etc/openvpn/client-common.txt $HOME/$1.ovpn
+echo "<key>
+$(cat /etc/openvpn/client-key.pem)
+</key>
+<cert>
+$(cat /etc/openvpn/client-cert.pem)
+</cert>
+<ca>
+$(cat /etc/openvpn/ca.pem)
+</ca>" >> $HOME/$1.ovpn
   while [[ ${ovpnauth} != @(s|S|y|Y|n|N) ]]; do
-    read -p "$(fun_trans "Colocar autenticacion de usuario en el archivo")? [S/N]: " -e -i S ovpnauth
+    read -p "$(fun_trans "Colocar la autenticacion de usuario en el archivo")? [S/N]: " -e -i S ovpnauth
     tput cuu1 && tput dl1
   done
-  [[ ${ovpnauth} = @(s|S) ]] && sed -i "s;auth-user-pass;<auth-user-pass>\n$1\n$2\n</auth-user-pass>;g" ~/$1.ovpn
+  [[ ${ovpnauth} = @(n|N) ]] && sed -i "s;auth-user-pass;<auth-user-pass>\n$1\n$2\n</auth-user-pass>;g" $HOME/$1.ovpn
   cd $HOME
   zip ./$1.zip ./$1.ovpn > /dev/null 2>&1
   rm ./$1.ovpn > /dev/null 2>&1
-
   echo -e "\033[1;31m$(fun_trans "Archivo creado"): ($HOME/$1.zip)"
  fi
 }
-
-unlockall2 () {
-for user in $(cat /etc/passwd |awk -F : '$3 > 900 {print $1}' |grep -v "rick" |grep -vi "nobody")
-do
-userpid=$(ps -u $user |awk {'print $1'})
-
-usermod -U $user &>/dev/null
-done
-}
-
-eliminar_all () {
-echo -e "\033[1;31m  ELIMINANDO TODOS LOS USUARIOS"
-msg -bar
-read -p "►► Presione enter para continuar ◄◄"
-service dropbear stop &>/dev/null
-service sshd stop &>/dev/null
-service ssh stop &>/dev/null
-service stunnel4 stop &>/dev/null
-service squid stop &>/dev/null
-for user in $(cat /etc/passwd |awk -F : '$3 > 900 {print $1}' |grep -v "rick" |grep -vi "nobody")
-do
-userpid=$(ps -u $user |awk {'print $1'})
-kill "$userpid" 2>/dev/null
-userdel $user
-echo -e "\033[1;32mUSUARIO:\033[1;33m $user \033[1;31mEliminado"
-done
-rm -rf /etc/ADMuser
-service sshd restart &>/dev/null
-service ssh restart &>/dev/null
-service dropbear start &>/dev/null
-service stunnel4 start &>/dev/null
-service squid restart &>/dev/null
-rm -rf /etc/newadm-userlock &>/dev/null
-rm -rf /etc/newadm/ger-user/Limiter.log &>/dev/null
-unlockall2
-msg -bar
-}
-
-reset_contador () {
-echo -e "\033[1;33m  REINICIAR CONTADOR DE BLOQUEOS"
-msg -bar
-echo -e "\033[1;97m !! Usar unicamente cuando en el apartado del contador\nmarque alguna cantidad erronea. ¡¡"
-echo ""
-echo -e "\033[1;91m Salir   CTRL+C"
-msg -bar
-read -p "►► Presione enter para continuar ◄◄"
-rm -rf /etc/newadm-userlock
-rm -rf /etc/newadm/ger-user/Limiter.log
-unlockall2
-echo -e "\033[1;92m   ¡¡CONTADORES REINICIADOS!!"
-msg -bar
-}
-notifi () {
-notify -i "⚠️ ATENCION EN VPS IP: $myip ⚠️" -t "SE BLOQUEO UN USUARIO O EXPIRO"
-}
-
 block_userfun () {
 local USRloked="/etc/newadm-userlock"
 local LIMITERLOG="${USRdatabase}/Limiter.log"
-local LIMITERLOG2="${USRdatabase}/Limiter2.log"
-if [[ $2 = "-loked" ]]; then 
+if [[ $2 = "-loked" ]]; then
 [[ $(cat ${USRloked}|grep -w "$1") ]] && return 1
-echo " $1 (BLOCK-MULTILOGIN) $(date +%r--%d/%m/%y)"
-notify -i "⚠️ AVISO DE VPS: $NOM1 ⚠️" -t "🔹USUARIO: $1 ❗️📵BLOQUEADO📵❗️" &>/dev/null
-pkill -u $1 &>/dev/null
+echo "USER: $1 (BLOQUEADO - MULTILOGUIN) $(date +%r)"
 fi
 if [[ $(cat ${USRloked}|grep -w "$1") ]]; then
 usermod -U "$1" &>/dev/null
@@ -137,47 +63,42 @@ usermod -U "$1" &>/dev/null
    [[ -e ${LIMITERLOG} ]] && rm ${LIMITERLOG}
    for value in `echo ${newbase}`; do
    echo $value >> ${LIMITERLOG}
-   echo $value >> ${LIMITERLOG}    
    done
 }
 return 1
 else
 usermod -L "$1" &>/dev/null
-pkill -u $1 &>/dev/null
 echo $1 >> ${USRloked}
-#notifi &>/dev/null
 return 0
 fi
-
-} 
-
+}
 block_user () {
 local USRloked="/etc/newadm-userlock"
 [[ ! -e ${USRloked} ]] && touch ${USRloked}
 usuarios_ativos=($(mostrar_usuarios))
 if [[ -z ${usuarios_ativos[@]} ]]; then
-msg -verm "$(fun_trans "Ningun Usuario Registrado")"
+msg -verm "$(fun_trans "Ningun usuario registrado")"
 msg -bar
 return 1
 else
-msg -ama "$(fun_trans "Usuarios Actualmente Activos En El Servidor")"
+msg -ama "$(fun_trans "Usuarios actualmente activos en el servidor")"
 msg -bar
 Numb=0
 for us in $(echo ${usuarios_ativos[@]}); do
 if [[ $(cat ${USRloked}|grep -w "${us}") ]]; then
-msg -ne "[$Numb] ->" && echo -e "\033[1;33m ${us} \033[1;31m[Loked]"
+msg -ne "[$Numb] ->" && echo -e "\033[1;33m ${us} \033[1;31mLoked"
 else
-msg -ne "[$Numb] ->" && echo -e "\033[1;33m ${us} \033[1;32m[Unlocked]"
+msg -ne "[$Numb] ->" && echo -e "\033[1;33m ${us} \033[1;32mUnlocked"
 fi
 let Numb++
 done
 msg -bar
 fi
-msg -ama "$(fun_trans "Escriba o Seleccione Un Usuario")"
+msg -ama "$(fun_trans "Escriba o seleccione un usuario")"
 msg -bar
 unset selection
 while [[ ${selection} = "" ]]; do
-echo -ne "\033[1;37mSeleccione: " && read selection
+echo -ne "\033[1;37mSelect: " && read selection
 tput cuu1 && tput dl1
 done
 if [[ ! $(echo "${selection}" | egrep '[^0-9]') ]]; then
@@ -195,7 +116,7 @@ fi
      msg -bar
      return 1
      }
-msg -ne "$(fun_trans "Usuario Seleccionado"): " && echo -ne "$usuario_del "
+msg -ne "$(fun_trans "Usuario Selecionado"): " && echo -ne "$usuario_del "
 block_userfun "$usuario_del" && msg -verm "[$(fun_trans "Bloqueado")]" || msg -verd "[$(fun_trans "Desbloqueado")]"
 msg -bar
 }
@@ -284,7 +205,7 @@ for pid in `echo -e "$pids"`; do
     user=`echo $login |awk -F" " '{print $10}' | sed -r "s/'//g"`
     waktu=$(echo $login |awk -F" " '{print $2"-"$1,$3}')
     [[ -z $user ]] && continue
-	echo "$user|$PID|$waktu"
+    echo "$user|$PID|$waktu"
     fi
 done
 }
@@ -320,7 +241,7 @@ unset RECIVED; unset SEND; unset HOUR
 RECIVED=$(echo $(echo ${RECIVED}0|bc)|byte)
 SEND=$(echo $(echo ${SEND}0|bc)|byte)
 HOUR=$(echo -e $HOUR|sort -n|tail -1)
-echo -e "$user|$i|$RECIVED|$SEND|$HOUR" 
+echo -e "$user|$i|$RECIVED|$SEND|$HOUR"
 done
 }
 err_fun () {
@@ -329,15 +250,15 @@ err_fun () {
      2)msg -verm "$(fun_trans "Usuario con nombre muy corto")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
      3)msg -verm "$(fun_trans "Usuario con nombre muy grande")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
      4)msg -verm "$(fun_trans "Contraseña Nula")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
-     5)msg -verm "$(fun_trans "Contraseña muy corta")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
-     6)msg -verm "$(fun_trans "Contraseña muy grande")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
+     5)msg -verm "$(fun_trans "Contrasena Muy corta")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
+     6)msg -verm "$(fun_trans "Contrasena Muy Grande")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
      7)msg -verm "$(fun_trans "Duracion Nula")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
-     8)msg -verm "$(fun_trans "Duracion invalida utilize numeros")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
-     9)msg -verm "$(fun_trans "Duracion maxima y de un año")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
+     8)msg -verm "$(fun_trans "Duracion no valida utiliza numeros")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
+     9)msg -verm "$(fun_trans "Duracion maxima de un ano")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
      11)msg -verm "$(fun_trans "Limite Nulo")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
      12)msg -verm "$(fun_trans "Limite invalido utilize numeros")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
-     13)msg -verm "$(fun_trans "Limite maximo de 999")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
-     14)msg -verm "$(fun_trans "Usuario Ya Existe")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
+     13)msg -verm "$(fun_trans "Limite maximo es de 999")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
+     14)msg -verm "$(fun_trans "Usuario Ya existe")"; sleep 2s; tput cuu1; tput dl1; tput cuu1; tput dl1;;
      esac
 }
 new_user () {
@@ -346,15 +267,15 @@ if [[ -z ${usuarios_ativos[@]} ]]; then
 msg -verm "$(fun_trans "Ningun usuario registrado")"
 msg -bar
 else
-msg -ama "$(fun_trans "Usuarios Actualmente Activos En El Servidor")"
+msg -ama "$(fun_trans "Usuarios actualmente activos en el servidor")"
 msg -bar
 for us in $(echo ${usuarios_ativos[@]}); do
-msg -ne "Usuario: " && echo "${us}"
+msg -ne "User: " && echo "${us}"
 done
 msg -bar
 fi
 while true; do
-     msg -ne "$(fun_trans "Nombre Del Nuevo Usuario")"
+     msg -ne "$(fun_trans "Nombre del nuevo usuario")"
      read -p ": " nomeuser
      nomeuser="$(echo $nomeuser|sed -e 's/[^a-z0-9 -]//ig')"
      if [[ -z $nomeuser ]]; then
@@ -369,7 +290,7 @@ while true; do
      break
 done
 while true; do
-     msg -ne "$(fun_trans "Contraseña Del Nuevo Usuario")"
+     msg -ne "$(fun_trans "Contrasena Para El Nuevo usuario")"
      read -p ": " senhauser
      if [[ -z $senhauser ]]; then
      err_fun 4 && continue
@@ -381,7 +302,7 @@ while true; do
      break
 done
 while true; do
-     msg -ne "$(fun_trans "Tiempo de Duracion del Nuevo Usuario")"
+     msg -ne "$(fun_trans "Tiempo de Duracion del nuevo usuario")"
      read -p ": " diasuser
      if [[ -z "$diasuser" ]]; then
      err_fun 7 && continue
@@ -393,7 +314,7 @@ while true; do
      break
 done
 while true; do
-     msg -ne "$(fun_trans "Limite de Conexion del Nuevo Usuario")"
+     msg -ne "$(fun_trans "Limite de conexion del nuevo usuario")"
      read -p ": " limiteuser
      if [[ -z "$limiteuser" ]]; then
      err_fun 11 && continue
@@ -408,21 +329,17 @@ done
      tput cuu1 && tput dl1
      tput cuu1 && tput dl1
      tput cuu1 && tput dl1
-     msg -ne "$(fun_trans "IP del Servidor"): " && echo -e "$(meu_ip)"
+     msg -ne "$(fun_trans "IP del servidor"): " && echo -e "$(meu_ip)"
      msg -ne "$(fun_trans "Usuario"): " && echo -e "$nomeuser"
-     msg -ne "$(fun_trans "Contraseña"): " && echo -e "$senhauser"
+     msg -ne "$(fun_trans "contrasena"): " && echo -e "$senhauser"
      msg -ne "$(fun_trans "Dias de Duracion"): " && echo -e "$diasuser"
-     msg -ne "$(fun_trans "Fecha de Expiracion"): " && echo -e "$(date "+%F" -d " + $diasuser days")"
-     msg -ne "$(fun_trans "Limite de Conexion"): " && echo -e "$limiteuser"
+     msg -ne "$(fun_trans "Fecha de expiracion"): " && echo -e "$(date "+%F" -d " + $diasuser days")"
+     msg -ne "$(fun_trans "Limite de conexion"): " && echo -e "$limiteuser"
 msg -bar
-diasuser2="$(echo "$diasuser"|bc)+1"
-echo "${diasuser2}"|bc > /etc/newadm/ger-user/DIAS.log
-diasuser3="$(less /etc/newadm/ger-user/DIAS.log)"
-add_user "${nomeuser}" "${senhauser}" "${diasuser3}" "${limiteuser}" && msg -ama "$(fun_trans "Usuario Creado con Exito")" || msg -verm "$(fun_trans "Error, Usuario no creado")"
+add_user "${nomeuser}" "${senhauser}" "${diasuser}" "${limiteuser}" && msg -ama "$(fun_trans "Usuario creado con exito")" || msg -verm "$(fun_trans "Error, Usuario no creado!!")"
 [[ $(dpkg --get-selections|grep -w "openvpn"|head -1) ]] && [[ -e /etc/openvpn/openvpn-status.log ]] && newclient "$nomeuser" "$senhauser"
 msg -bar
 }
-
 remove_user () {
 usuarios_ativos=($(mostrar_usuarios))
 if [[ -z ${usuarios_ativos[@]} ]]; then
@@ -430,7 +347,7 @@ msg -verm "$(fun_trans "Ningun usuario registrado")"
 msg -bar
 return 1
 else
-msg -ama "$(fun_trans "Usuarios Actualmente activos en el servidor")"
+msg -ama "$(fun_trans "Usuarios actualmente activos en el servidor")"
 msg -bar
 i=0
 for us in $(echo ${usuarios_ativos[@]}); do
@@ -439,12 +356,11 @@ let i++
 done
 msg -bar
 fi
-msg -ama "$(fun_trans "Escriba o Seleccione un Usuario")"
-msg -ama "\033[1;31mSe recomienda desbloquear todas las cuentas \nbloqueadas antes de borrar algun usuario."
+msg -ama "$(fun_trans "Escriba o seleccione un usuario")"
 msg -bar
 unset selection
 while [[ -z ${selection} ]]; do
-echo -ne "\033[1;37m$(fun_trans "Seleccione Una Opcion"): " && read selection
+echo -ne "\033[1;37m$(fun_trans "Seleccione una opcion"): " && read selection
 tput cuu1 && tput dl1
 done
 if [[ ! $(echo "${selection}" | egrep '[^0-9]') ]]; then
@@ -462,12 +378,8 @@ fi
      msg -bar
      return 1
      }
-msg -ne "$(fun_trans "Usuario Seleccionado"): " && echo -ne "$usuario_del" 
-pkill -u $usuario_del
-rm_user "$usuario_del" && msg -verd " [$(fun_trans "Removido")]" || msg -verm " [$(fun_trans "No Removido")]"
-rm -rf /etc/newadm-userlock
-rm -rf /etc/newadm/ger-user/Limiter.log
-unlockall2
+msg -ne "$(fun_trans "Usuario Selecionado"): " && echo -ne "$usuario_del"
+rm_user "$usuario_del" && msg -verd " [$(fun_trans "Eliminado")]" || msg -verm " [$(fun_trans "No Eliminado")]"
 msg -bar
 }
 renew_user () {
@@ -477,7 +389,7 @@ msg -verm "$(fun_trans "Ningun usuario registrado")"
 msg -bar
 return 1
 else
-msg -ama "$(fun_trans "Usuarios Actualmente Activos en el Servidor")"
+msg -ama "$(fun_trans "Usuarios actualmente activos en el servidor")"
 msg -bar
 i=0
 for us in $(echo ${usuarios_ativos[@]}); do
@@ -486,11 +398,11 @@ let i++
 done
 msg -bar
 fi
-msg -ama "$(fun_trans "Escriba o seleccione un Usuario")"
+msg -ama "$(fun_trans "Escriba o seleccione un usuario")"
 msg -bar
 unset selection
 while [[ -z ${selection} ]]; do
-echo -ne "\033[1;37m$(fun_trans "Seleccione una Opcion"): " && read selection
+echo -ne "\033[1;37m$(fun_trans "Seleccione la opcion"): " && read selection
 tput cuu1
 tput dl1
 done
@@ -525,7 +437,7 @@ while true; do
      break
 done
 msg -bar
-renew_user_fun "${useredit}" "${diasuser}" && msg -ama "$(fun_trans "Usuario Modificado Con Exito")" || msg -verm "$(fun_trans "Error, Usuario no Modificado")"
+renew_user_fun "${useredit}" "${diasuser}" && msg -ama "$(fun_trans "Usuario Modificado Con Exito!!!")" || msg -verm "$(fun_trans "Error, Usuario no modificado")"
 msg -bar
 }
 edit_user () {
@@ -535,7 +447,7 @@ msg -verm "$(fun_trans "Ningun usuario registrado")"
 msg -bar
 return 1
 else
-msg -ama "$(fun_trans "Usuarios Actualmente activos en el Servidor")"
+msg -ama "$(fun_trans "Usuarios Actualmente activos en el servidor")"
 msg -bar
 i=0
 for us in $(echo ${usuarios_ativos[@]}); do
@@ -544,11 +456,11 @@ let i++
 done
 msg -bar
 fi
-msg -ama "$(fun_trans "Escriba o seleccione un Usuario")"
+msg -ama "$(fun_trans "Escriba o seleccione un usuario")"
 msg -bar
 unset selection
 while [[ -z ${selection} ]]; do
-echo -ne "\033[1;37m$(fun_trans "Seleccione una Opcion"): " && read selection
+echo -ne "\033[1;37m$(fun_trans "Seleccione la opcion"): " && read selection
 tput cuu1; tput dl1
 done
 if [[ ! $(echo "${selection}" | egrep '[^0-9]') ]]; then
@@ -567,8 +479,8 @@ fi
      return 1
      }
 while true; do
-msg -ne "$(fun_trans "Usuario Seleccionado"): " && echo -e "$useredit"
-     msg -ne "$(fun_trans "Nueva Contraseña de"): $useredit"
+msg -ne "$(fun_trans "Usuario Selecionado"): " && echo -e "$useredit"
+     msg -ne "$(fun_trans "Nueva Contrasena de"): $useredit"
      read -p ": " senhauser
      if [[ -z "$senhauser" ]]; then
      err_fun 4 && continue
@@ -608,12 +520,12 @@ done
      tput cuu1 && tput dl1
      tput cuu1 && tput dl1
      msg -ne "$(fun_trans "Usuario"): " && echo -e "$useredit"
-     msg -ne "$(fun_trans "Contraseña"): " && echo -e "$senhauser"
+     msg -ne "$(fun_trans "Contrasena"): " && echo -e "$senhauser"
      msg -ne "$(fun_trans "Dias de Duracion"): " && echo -e "$diasuser"
-     msg -ne "$(fun_trans "Fecha de Expiracion"): " && echo -e "$(date "+%F" -d " + $diasuser days")"
-     msg -ne "$(fun_trans "Limite de Conexion"): " && echo -e "$limiteuser"
+     msg -ne "$(fun_trans "Fecha de expiracion"): " && echo -e "$(date "+%F" -d " + $diasuser days")"
+     msg -ne "$(fun_trans "Limite de conexion"): " && echo -e "$limiteuser"
 msg -bar
-edit_user_fun "${useredit}" "${senhauser}" "${diasuser}" "${limiteuser}" && msg -ama "$(fun_trans "Usuario Modificado Con Exito")" && rm -rf ${SCPusr}/Limiter.log || msg -verm "$(fun_trans "Error, Usuario nao Modificado")"
+edit_user_fun "${useredit}" "${senhauser}" "${diasuser}" "${limiteuser}" && msg -ama "$(fun_trans "Usuario Modificado Con Exito")" || msg -verm "$(fun_trans "Error, Usuario no modificado")"
 msg -bar
 }
 detail_user () {
@@ -621,14 +533,14 @@ red=$(tput setaf 1)
 gren=$(tput setaf 2)
 yellow=$(tput setaf 3)
 if [[ ! -e "${USRdatabase}" ]]; then
-msg -verm "$(fun_trans "No se ha identificado una base de datos con los Usuarios")"
-msg -verm "$(fun_trans "Los Usuarios a Seguir No contiene Ninguna Informacion")"
+msg -verm "$(fun_trans "No se ha identificado una base de datos con usuarios")"
+msg -verm "$(fun_trans "Los usuarios a seguir no contienen ninguna informacion")"
 msg -bar2
 fi
-txtvar=$(printf '%-15s' "USUARIO")
-txtvar+=$(printf '%-20s' "CONTRASEÑA")
-txtvar+=$(printf '%-13s' "FECHA")
-txtvar+=$(printf '%-10s' "LIMITE")
+txtvar=$(printf '%-16s' "USUARIO")
+txtvar+=$(printf '%-16s' "CONTRASENA")
+txtvar+=$(printf '%-16s' "FECHA")
+txtvar+=$(printf '%-6s' "LIMITE")
 echo -e "\033[1;33m${txtvar}"
 msg -bar2
 VPSsec=$(date +%s)
@@ -646,11 +558,11 @@ if [[ -e "${USRdatabase}" ]]; then
     else
     EXPTIME="${gren}[$(($(($DataSec - $VPSsec)) / 86400))]"
     fi
-    txtvar+="$(printf '%-29s' "${yellow}${DateExp}${EXPTIME}")"
-    txtvar+="$(printf '%-5s' "${yellow}$(cat ${USRdatabase}|grep -w "${user}"|cut -d'|' -f4)")"
+    txtvar+="$(printf '%-26s' "${yellow}${DateExp}${EXPTIME}")"
+    txtvar+="$(printf '%-11s' "${yellow}$(cat ${USRdatabase}|grep -w "${user}"|cut -d'|' -f4)")"
     else
     txtvar+="$(printf '%-21s' "${red}???")"
-    txtvar+="$(printf '%-29s' "${red}???")"
+    txtvar+="$(printf '%-21s' "${red}???")"
     txtvar+="$(printf '%-11s' "${red}???")"
   fi
 fi
@@ -661,11 +573,11 @@ msg -bar2
 monit_user () {
 yellow=$(tput setaf 3)
 gren=$(tput setaf 2)
-msg -verm "$(fun_trans "Monitor de Conexiones de Usuarios")"
+msg -verm "$(fun_trans "Monitor de conexiones de usuario")"
 msg -bar
-txtvar=$(printf '%-20s' "USUARIO")
-txtvar+=$(printf '%-19s' "CONEXIONES")
-txtvar+=$(printf '%-16s' "TIME/ON")
+txtvar=$(printf '%-13s' "USUARIO")
+txtvar+=$(printf '%-19s' "CONEXION")
+txtvar+=$(printf '%-16s' "TIEMPO/ON")
 echo -e "\033[1;33m${txtvar}"
 msg -bar
 while read user; do
@@ -700,7 +612,7 @@ pid=$!
 sleep 0.5s
 done <<< "$(mostrar_usuarios)"
 while [[ -d /proc/$pid ]]; do
-sleep 3s
+sleep 1s
 done
 msg -bar
 }
@@ -709,13 +621,13 @@ red=$(tput setaf 1)
 gren=$(tput setaf 2)
 yellow=$(tput setaf 3)
 txtvar=$(printf '%-25s' "USUARIO")
-txtvar+=$(printf '%-20s' "VALIDIDEZ")
+txtvar+=$(printf '%-20s' "VÁLIDO")
 echo -e "\033[1;33m${txtvar}"
 msg -bar
 expired="${red}$(fun_trans "Expirado")"
 valid="${gren}$(fun_trans "Usuario Valido")"
 never="${yellow}$(fun_trans "Usuario Ilimitado")"
-removido="${red}$(fun_trans "Removido")"
+removido="${red}$(fun_trans "Eliminado")"
 DataVPS=$(date +%s)
 while read user; do
 DataUser=$(chage -l "${user}" |grep -i co|awk -F ":" '{print $2}')
@@ -735,13 +647,10 @@ else
 echo -e "${yellow}$usr $valid"
 fi
 done <<< "$(mostrar_usuarios)"
-rm -rf /etc/newadm-userlock
-rm -rf /etc/newadm/ger-user/Limiter.log
-unlockall2
 msg -bar
 }
 verif_fun () {
- # DECLARANDO VARIAVEIS PRIMARIAS
+# DECLARANDO VARIAVEIS PRIMARIAS
     local conexao
     local limite
     local TIMEUS
@@ -749,17 +658,15 @@ verif_fun () {
     declare -A limite
     declare -A TIMEUS
     local LIMITERLOG="${SCPusr}/Limiter.log"
-	local LIMITERLOG2="${SCPusr}/Limiter2.log"
     [[ $(dpkg --get-selections|grep -w "openssh"|head -1) ]] && local SSH=ON || local SSH=OFF
     [[ $(dpkg --get-selections|grep -w "dropbear"|head -1) ]] && local DROP=ON || local DROP=OFF
     [[ $(dpkg --get-selections|grep -w "openvpn"|head -1) ]] && [[ -e /etc/openvpn/openvpn-status.log ]] && local OPEN=ON || local OPEN=OFF
     while true; do
     unset EXPIRED
     unset ONLINES
-	unset BLOQUEADO
-    #[[ -e ${MyTIME} ]] && source ${MyTIME}
+    [[ -e ${MyTIME} ]] && source ${MyTIME}
     local TimeNOW=$(date +%s)
-    # INICIA VERIFICAȃO
+    # INICIA VERIFICAÇÃO
     while read user; do
            echo -ne "\033[1;33mUSUARIO: \033[1;32m$user "
            if [[ ! $(echo $(mostrar_usuarios)|grep -w "$user") ]]; then
@@ -774,55 +681,38 @@ verif_fun () {
            local DataSEC=$(date +%s --date="$DataUser")
            if [[ "$DataSEC" -lt "$TimeNOW" ]]; then
               EXPIRED="1+"          
-              block_userfun $user -loked && echo " $user (EXPIRADO) $(date +%r--%d/%m/%y)" >> $LIMITERLOG && echo " $user (EXPIRADO) $(date +%r--%d/%m/%y)" >> $LIMITERLOG2 && notify -i "⚠️ AVISO DE VPS: $NOM1 ⚠️" -t "🔹USUARIO: $user ❗️📵EXPIRADO📵❗️" && pkill -u $user
-              echo -e "\033[1;31m EXPIRADO"
+              block_userfun $user -loked && echo "USER: $user (BLOQUEADO - CADUCADO) $(date +%r)" >> $LIMITERLOG
+              echo -e "\033[1;31m CADUCADO"
               continue
            fi
            local PID="0+"
            [[ $SSH = ON  ]] && PID+="$(ps aux|grep -v grep|grep sshd|grep -w "$user"|grep -v root|wc -l 2>/dev/null)+"
            [[ $DROP = ON  ]] && PID+="$(dropbear_pids|grep -w "$user"|wc -l 2>/dev/null)+"
            [[ $OPEN = ON  ]] && [[ $(openvpn_pids|grep -w "$user"|cut -d'|' -f2) ]] && PID+="$(openvpn_pids|grep -w "$user"|cut -d'|' -f2)+"
-            local ONLINES+="$(echo ${PID}0|bc)+"
-            local conexao[$user]="$(echo ${PID}0|bc)"
-           if [[ ${conexao[$user]} -gt '0' ]]; then #CONTADOR DE TEMPO ONLINE
+           local ONLINES+="$(echo ${PID}0|bc)+"
+           local conexao[$user]="$(echo ${PID}0|bc)"
+            if [[ ${conexao[$user]} -gt '0' ]]; then #CONTADOR DE TEMPO ONLINE
               [[ -z "${TIMEUS[$user]}" ]] && local TIMEUS[$user]=0
               [[ "${TIMEUS[$user]}" != +([0-9]) ]] && local TIMEUS[$user]=0
-              local TIMEUS[$user]="$((57+${TIMEUS[$user]}))"
+              local TIMEUS[$user]="$((2+${TIMEUS[$user]}))"
               local VARS="$(cat ${MyTIME}|grep -w -v "$user")"
               echo "TIMEUS[$user]='${TIMEUS[$user]}'" > ${MyTIME}
-             for variavel in $(echo ${VARS}); do echo "${variavel}" >> ${MyTIME}; done
+              for variavel in $(echo ${VARS}); do echo "${variavel}" >> ${MyTIME}; done
             fi           
            local limite[$user]="$(cat ${USRdatabase}|grep -w "${user}"|cut -d'|' -f4)"
            [[ -z "${limite[$user]}" ]] && continue
            [[ "${limite[$user]}" != +([0-9]) ]] && continue
            if [[ "${conexao[$user]}" -gt "${limite[$user]}" ]]; then
            local lock=$(block_userfun $user -loked)
-           pkill -u $user
-		   
-		   droplim=`dropbear_pids|grep -w "$user"|cut -d'|' -f2` 
-		   kill -9 $droplim &>/dev/null
-		   
-		   openlim=`openvpn_pids|grep -w "$user"|cut -d'|' -f2`
-		   kill -9 $openlim &>/dev/null
-		   
-		   echo "$lock" >> $LIMITERLOG && echo "$lock" >> $LIMITERLOG2
-           echo -e "\033[1;31m ULTRAPASO LIMITE"
+           [[ ! -z $lock ]] && echo "$lock" >> $LIMITERLOG
+           echo -e "\033[1;31m EXCEDIO LIMITE"
            continue
            fi
-           echo -e "\033[1;33m OK! \033[1;31m${conexao[$user]} CONEXIONESS"
-		   BLOQUEADO="$(wc -l /etc/newadm-userlock | awk '{print $1}')"
-		   #BLOQUEADO="$(grep -c BLOCK-MULTILOGIN /etc/newadm/ger-user/Limiter.log)"
-		   BLOQUEADO2="$(echo ${BLOQUEADO}|bc)0"
-		   BLOQUEADO3="/10"
-		   EXPIRADO="$(grep -c EXPIRADO /etc/newadm/ger-user/Limiter.log)"
-		   EXPIRADO2="$(echo ${EXPIRADO}|bc)0"
-		   EXPIRADO3="/10"
+           echo -e "\033[1;33m OK! \033[1;31m${conexao[$user]} CONEXIONES"
     done <<< "$(mostrar_usuarios)"
     echo "${ONLINES}0"|bc > ${SCPdir}/USRonlines
-    #echo "${EXPIRED}0"|bc > ${SCPdir}/USRexpired
-	echo "${EXPIRADO2}${EXPIRADO3}"|bc > ${SCPdir}/USRexpired
-	echo "${BLOQUEADO2}${BLOQUEADO3}"|bc > ${SCPdir}/USRbloqueados
-	sleep 25s # TEMPO DE ESPERA DO LOOP
+    echo "${EXPIRED}0"|bc > ${SCPdir}/USRexpired
+    sleep 2s # TEMPO DE ESPERA DO LOOP
     clear
     done
 }
@@ -833,54 +723,39 @@ menu_func "CREAR BACKUP" "RESTAURAR BACKUP"
 msg -bar
 unset selection
 while [[ ${selection} != @([1-2]) ]]; do
-echo -ne "\033[1;37m$(fun_trans "Seleccione una Opcion"): " && read selection
+echo -ne "\033[1;37m$(fun_trans "Seleccione la opcion"): " && read selection
 tput cuu1 && tput dl1
 done
 case ${selection} in
 1)
 cp ${USRdatabase} $HOME/Backup-adm
-msg -azu "$(fun_trans "Procedimiento Hecho con Exito, Guardado en:")"
+msg -azu "$(fun_trans "Procedimiento Hecho")"
 echo -e "\033[1;31mBACKUP > [\033[1;32m$HOME/Backup-adm\033[1;31m]"
 ;;
 2)
 while [[ ! -e ${dirbackup} ]]; do
-echo -ne "\033[1;37m ¡¡Recomiendo DESACTIVAR Limitador si es que lo tine ACTIVO!!\n"
-echo -ne "\033[1;37m Escriba la ubicacion de la copia de seguridad\n" 
-echo -ne "\033[1;37m ENTER para ruta predeterminada /root/Backup-adm: " && read dirbackup
-msg -bar
-[[ -z "${dirbackup}" ]] && dirbackup="/root/Backup-adm"
+echo -ne "\033[1;37m$(fun_trans "Escriba la ubicacion de la copia de seguridad"): " && read dirbackup
 tput cuu1 && tput dl1
 done
 VPSsec=$(date +%s)
 while read line; do
 nome=$(echo ${line}|cut -d'|' -f1)
-[[ $(echo $(mostrar_usuarios)|grep -w "$nome") ]] && { msg -verm "$nome [ERROR]"
+[[ $(echo $(mostrar_usuarios)|grep -w "$nome") ]] && {
+  msg -verm "$nome [ERROR]"
   continue
   }
 senha=$(echo ${line}|cut -d'|' -f2)
 DateExp=$(echo ${line}|cut -d'|' -f3)
 DataSec=$(date +%s --date="$DateExp")
-[[ "$VPSsec" -lt "$DataSec" ]] && dias="$(($(($DataSec - $VPSsec)) / 86400))" || dias="NP"
+[[ "$VPSsec" -lt "$DataSec" ]] && dias="$(($(($DataSec - $VPSsec)) / 86400))" || dias="30"
 limite=$(echo ${line}|cut -d'|' -f4)
-add_user "$nome" "$senha" "$dias" "$limite" &>/dev/null && msg -verd "$nome [CUENTA VALIDA]" || msg -verm "$nome [CUENTA INVALIDA FECHA EXPIRADA]"
+add_user "$nome" "$senha" "$dias" "$limite" && msg -verd "$nome [OK]" || msg -verm "$nome [ERROR]"
 done < ${dirbackup}
 ;;
 esac
 msg -bar
 }
-
-##LIMITADOR 
-
 verif_funx () {
-
-echo -e "\033[1;32m             LIMITADOR DE CUENTAS"
-msg -bar
-echo -e "Esta Opcion Limita las Conexiones de SSH/SSL/DROPBEAR"
-msg -bar
-[[ -z ${VERY} ]] && verificar="\033[1;32m ACTIVADO " || verificar="\033[1;31m DESACTIVADO "
-echo -e "            $verificar  --  CON EXITO"
-msg -bar
-
 PIDVRF="$(ps aux|grep "${SCPusr}/usercodes verificar"|grep -v grep|awk '{print $2}')"
 if [[ -z $PIDVRF ]]; then
 cd ${SCPusr}
@@ -891,34 +766,33 @@ kill -9 $pid &>/dev/null
 done
 [[ -e ${SCPdir}/USRonlines ]] && rm ${SCPdir}/USRonlines
 [[ -e ${SCPdir}/USRexpired ]] && rm ${SCPdir}/USRexpired
-[[ -e ${SCPdir}/USRbloqueados ]] && rm ${SCPdir}/USRbloqueados
 fi
 }
-
-##DESBLOEUEAR
-
-verif2_funx () {
-
-echo -e "\033[1;32m      DESBLOQUEO AUT. Y LIMPIADOR DE EXPIARDOS"
+cleanreg () {
+sudo rm -rf /etc/newadmin/ger-user/Limiter.log
+}
+userdell () {
+echo -e "\033[1;37mATENCION ESTO REMOVERA TODOS LOS USUARIOS, NO FUNCIONA CON OPENVPN...\033[0m"
 msg -bar
-echo -e "Esta opcion desbloquea cada 120 segundos a usuarios\nbloqueados por el limitador y limpia los usuarios expirados"
+sleep 1s 
+echo -e "\033[1;37m \033[0m \033[1;31mESTA SEGURO\033[0m \033[1;37m?\033[0m \033[1;31mSELECCIONE [s/n]\033[0m \033[1;33mPARA CONTINUAR\033[0m"
 msg -bar
-[[ -z ${VERY2} ]] && desbloqueo="\033[1;32m ACTIVADO " || desbloqueo="\033[1;31m DESACTIVADO "
-echo -e "            $desbloqueo  --  CON EXITO"
-msg -bar
-
-PIDVRF2="$(ps aux|grep "${SCPusr}/usercodes desbloqueo"|grep -v grep|awk '{print $2}')"
-if [[ -z $PIDVRF2 ]]; then
-cd ${SCPusr}
-screen -dmS very2 ${SCPusr}/usercodes desbloqueo
-else
-for pid in $(echo $PIDVRF2); do
-kill -9 $pid &>/dev/null
+read -p "Opcion: " -e -i s remov
+if [ "$remov" = "s" ]
+then
+for u in `awk -F : '$3 > 900 { print $1 }' /etc/passwd | grep -v "nobody" |grep -vi polkitd |grep -vi system-`; do
+userdel $u
 done
-
+msg -bar
+echo -e "\033[1;31mUSUARIOS ELIMINADOS CON EXITO!!\033[0m"
+sleep 4s
+else
+msg -bar
+echo -e "\033[1;31mOPERACION CANCELADA\033[0m"
+  sleep 4s
+adm
 fi
-}
-
+ }
 baner_fun () {
 local2="/etc/dropbear/banner"
 chk=$(cat /etc/ssh/sshd_config | grep -v "Banner")
@@ -997,67 +871,37 @@ service ssh restart > /dev/null 2>&1 &
 service sshd restart > /dev/null 2>&1 & 
 service dropbear restart > /dev/null 2>&1 &
 }
-
-desbloqueo_auto () {
-while true; do
-Desbloqueo.sh 2>/dev/null
-sleep 60s 
-
-    done
-}
-rec_total () {
-echo -e "\033[1;32m  REGISTRO TOTAL DE CUENTAS VIEJAS Y NUEVAS"
-msg -bar
-cat /etc/ADMuser
-msg -bar
-}
-# LIMITADOR AUTO
+# Execução
 if [[ "$1" = "verificar" ]]; then
 verif_fun
 exit
 fi
-[[ -z ${VERY} ]] && verificar="\033[1;31m[DESACTIVADO]" || verificar="\033[1;32m[ACTIVO]"
-
-# DESBLOQUEO AUTO
-if [[ "$1" = "desbloqueo" ]]; then
-desbloqueo_auto
-exit
-fi
-[[ -z ${VERY2} ]] && desbloqueo="\033[1;31m[DESACTIVADO]" || desbloqueo="\033[1;32m[ACTIVO]"
-
-msg -ama " MENU ADMINISTRACION DE USUARIOS | VPS-CO TITAN_ORIGIN"
+[[ -z ${VERY} ]] && verificar="\033[1;31mOff" || verificar="\033[1;32mOn"
+msg -ama "$(fun_trans "MENU DE ADMIMISTRACION DE USUARIOS")"
 msg -bar
-menu_func "CREAR NUEVO USUARIO" "\033[1;35mCREAR USUARIO TEMPORAL" "\033[1;91mREMOVER USUARIO" "BLOQUEAR O DESBLOQUEAR USUARIO" "\033[1;93mREINICIAR CONTADOR DE BLOQUEADOS y EXPIRADOS" "EDITAR USUARIO" "\033[1;92mRENOVAR USUARIO" "DETALLES DE TODOS USUARIOS" "MONITOR DE USUARIOS CONECTADOS" "ELIMINAR USUARIOS VENCIDOS" "BACKUP USUARIOS" "BANNER SSH" "\033[1;31m⚠️ELIMINAR TODOS LOS USUARIOS⚠️ \n" " -fi ${verificar} \033[1;97m🔒 LIMITADOR-DE-CUENTAS 🔒 -" " -fi ${desbloqueo} \033[1;97m🔓 DESBLOQUEO-AUTOMATICO 🔓 -" "\033[1;92mLOG DE CUENTAS REGISTRADAS" "LIMPIAR LOG DE LIMITADOR"
-[[ -e "${SCPusr}/Limiter2.log" ]] && echo -ne "$(msg -verd "[18]") $(msg -verm2 ">") " && msg -azu "$(fun_trans "\033[1;93mVER LOG DE LIMITADOR")"
-echo -ne "$(msg -verd "[0]") $(msg -verm2 ">")" && msg -bra "$(fun_trans "VOLVER")"
+menu_func "CREAR NUEVO USUARIO" "-am USUARIO TEMPORAL" "-rc ELIMINAR USUARIOS" "BLOQUEAR O DESBLOQUEAR USUARIO" "EDITAR USUARIO" "-vd RENOVAR USUARIO" "DETALLES DE TODOS LOS USUARIOS" "MONITOREAR USUARIOS CONECTADOS" "-rc ELIMINAR USUARIOS VENCIDOS" "-rc ELIMIMAR TODOS LOS USUARIOS" "-bl CREAR BACKUP DE USUARIOS" "BANNER SSH" "-bl LIMPIAR REGISTRO LIMITADOR" "-fi ${verificar} VERIFICACIONES"
+[[ -e "${SCPusr}/Limiter.log" ]] && echo -ne "$(msg -verd "[15]") $(msg -verm2 ">") " && msg -azu "$(fun_trans "VER REGISTRO DEL LIMITADOR")"
+echo -ne "$(msg -verd "[0]") $(msg -verm2 ">") " && msg -bra "$(fun_trans "VOLVER")"
 msg -bar
-selection=$(selection_fun 18)
+selection=$(selection_fun 15)
 case ${selection} in
 1)new_user;;
 2)${SCPdir2}/Crear-Demo.sh "${idioma}";;
 3)remove_user;;
 4)block_user;;
-5)reset_contador;;
-6)edit_user;;
-7)renew_user;;
-8)detail_user;;
-9)monit_user;;
-10)rm_vencidos;;
+5)edit_user;;
+6)renew_user;;
+7)detail_user;;
+8)monit_user;;
+9)rm_vencidos;;
+10)userdell;;
 11)backup_fun;;
 12)baner_fun;;
-13)eliminar_all;;
+13)cleanreg;;
 14)verif_funx;;
-15)verif2_funx;;
-16)rec_total;;
-17)
-rm -rf ${SCPusr}/Limiter2.log
-echo -e "\033[1;32m  LOG ELIMINADO CON EXITO"
-msg -bar
-;;
-18)
-sed -i -e 's/^[ \t]*//; s/[ \t]*$//; /^$/d' /etc/newadm/ger-user/Limiter2.log
-[[ -e "${SCPusr}/Limiter2.log" ]] && {
- cat ${SCPusr}/Limiter2.log
+15)
+[[ -e "${SCPusr}/Limiter.log" ]] && {
+ cat ${SCPusr}/Limiter.log
  msg -bar
  }
 ;;
