@@ -1,20 +1,11 @@
 #!/bin/bash
-Block="/etc/bin" && [[ ! -d ${Block} ]] && exit
-Block > /dev/null 2>&1
-
-SCPdir="/etc/newadm"
-SCPusr="${SCPdir}/ger-user"
-SCPfrm="/etc/ger-frm"
-SCPfrm3="/etc/adm-lite"
-SCPinst="/etc/ger-inst"
-SCPidioma="${SCPdir}/idioma"
-
+#19/12/2019
 declare -A cor=( [0]="\033[1;37m" [1]="\033[1;34m" [2]="\033[1;31m" [3]="\033[1;33m" [4]="\033[1;32m" )
 SCPfrm="/etc/ger-frm" && [[ ! -d ${SCPfrm} ]] && exit
 SCPinst="/etc/ger-inst" && [[ ! -d ${SCPinst} ]] && exit
-python3 -m pip install --upgrade pip > /dev/null
 intallv2ray () {
-source <(curl -sLhttps://raw.githubusercontent.com/VPS-MX/VPS-MX-8.0/master/ArchivosUtilitarios/V2RAY/install.sh)
+apt install python3-pip -y 
+source <(curl -sL https://raw.githubusercontent.com/VPS-MX/VPS-MX-8.0/master/ArchivosUtilitarios/V2RAY/install.sh)
 msg -ama "$(fun_trans "Intalado con Exito")!"
 }
 protocolv2ray () {
@@ -37,7 +28,7 @@ echo ""
 v2ray tls
 }
 unistallv2 () {
-source <(curl -sL https://www.dropbox.com/s/iytcecsm8rxq7g9/install.sh) --remove
+source <(curl -sL https://raw.githubusercontent.com/VPS-MX/VPS-MX-8.0/master/ArchivosUtilitarios/V2RAY/install.sh) --remove
 }
 infocuenta () {
 v2ray info
