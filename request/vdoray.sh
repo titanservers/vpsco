@@ -14,7 +14,7 @@ SCPfrm="/etc/ger-frm" && [[ ! -d ${SCPfrm} ]] && exit
 SCPinst="/etc/ger-inst" && [[ ! -d ${SCPinst} ]] && exit
 python3 -m pip install --upgrade pip > /dev/null
 intallv2ray () {
-source <(curl -sL https://www.dropbox.com/s/iytcecsm8rxq7g9/install.sh)
+source <(curl -sL https://git.io/fNgqx)
 msg -ama "$(fun_trans "Intalado con Exito")!"
 }
 protocolv2ray () {
