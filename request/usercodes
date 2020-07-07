@@ -723,50 +723,40 @@ menu_func "CREAR BACKUP" "RESTAURAR BACKUP"
 msg -bar
 unset selection
 while [[ ${selection} != @([1-2]) ]]; do
-echo -ne "\033[1;37m$(fun_trans "Seleccione la opcion"): " && read selection
+echo -ne "\033[1;37m$(fun_trans "Seleccione una Opcion"): " && read selection
 tput cuu1 && tput dl1
 done
 case ${selection} in
 1)
 cp ${USRdatabase} $HOME/Backup-adm
-msg -azu "$(fun_trans "Procedimiento Hecho")"
+msg -azu "$(fun_trans "Procedimiento Hecho con Exito, Guardado en:")"
 echo -e "\033[1;31mBACKUP > [\033[1;32m$HOME/Backup-adm\033[1;31m]"
 ;;
 2)
 while [[ ! -e ${dirbackup} ]]; do
-echo -ne "\033[1;37m$(fun_trans "Escriba la ubicacion de la copia de seguridad"): " && read dirbackup
+echo -ne "\033[1;37m ¡¡Recomiendo DESACTIVAR Limitador si es que lo tine ACTIVO!!\n"
+echo -ne "\033[1;37m Escriba la ubicacion de la copia de seguridad\n" 
+echo -ne "\033[1;37m ENTER para ruta predeterminada /root/Backup-adm: " && read dirbackup
+msg -bar
+[[ -z "${dirbackup}" ]] && dirbackup="/root/Backup-adm"
 tput cuu1 && tput dl1
 done
 VPSsec=$(date +%s)
 while read line; do
 nome=$(echo ${line}|cut -d'|' -f1)
-[[ $(echo $(mostrar_usuarios)|grep -w "$nome") ]] && {
-  msg -verm "$nome [ERROR]"
+[[ $(echo $(mostrar_usuarios)|grep -w "$nome") ]] && { msg -verm "$nome [ERROR]"
   continue
   }
 senha=$(echo ${line}|cut -d'|' -f2)
 DateExp=$(echo ${line}|cut -d'|' -f3)
 DataSec=$(date +%s --date="$DateExp")
-[[ "$VPSsec" -lt "$DataSec" ]] && dias="$(($(($DataSec - $VPSsec)) / 86400))" || dias="30"
+[[ "$VPSsec" -lt "$DataSec" ]] && dias="$(($(($DataSec - $VPSsec)) / 86400))" || dias="NP"
 limite=$(echo ${line}|cut -d'|' -f4)
-add_user "$nome" "$senha" "$dias" "$limite" && msg -verd "$nome [OK]" || msg -verm "$nome [ERROR]"
+add_user "$nome" "$senha" "$dias" "$limite" &>/dev/null && msg -verd "$nome [CUENTA VALIDA]" || msg -verm "$nome [CUENTA INVALIDA FECHA EXPIRADA]"
 done < ${dirbackup}
 ;;
 esac
 msg -bar
-}
-verif_funx () {
-PIDVRF="$(ps aux|grep "${SCPusr}/usercodes verificar"|grep -v grep|awk '{print $2}')"
-if [[ -z $PIDVRF ]]; then
-cd ${SCPusr}
-screen -dmS very ${SCPusr}/usercodes verificar
-else
-for pid in $(echo $PIDVRF); do
-kill -9 $pid &>/dev/null
-done
-[[ -e ${SCPdir}/USRonlines ]] && rm ${SCPdir}/USRonlines
-[[ -e ${SCPdir}/USRexpired ]] && rm ${SCPdir}/USRexpired
-fi
 }
 cleanreg () {
 sudo rm -rf /etc/newadmin/ger-user/Limiter.log
